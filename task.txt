@@ -1,0 +1,22 @@
+(PL)
+Porównanie właściwości wariantów algorytmów transmisji w sieciach dostarczania treści (CDN): W sieciach
+dostarczania treści (ang. content delivery networks), użytkownik odbiera informację z jednego z kilku dostępnych serwerów.
+W tym kontekście, dla danego użytkownika jeden z tychże serwerów jest pełni rolę serwera podstawowego a inne serwerów
+zabezpieczających (podobnie jak trasy do nich prowadzące). W ramach zadania należy dla przydzielonej struktury sieci:
+(1) zaimplementować schemat wyznaczania tras: podstawowej i zabezpieczających prowadzących łącznie do dwóch oraz
+trzech różnych najbliższych serwerów (trasy wzajemnie rozłączne węzłowo) wykorzystując podejście „naiwne” i algorytm
+Dijkstry; (2) zaimplementować wariant metody (1) zakładający, że wszystkie trasy w odniesieniu do danego węzła
+użytkownika prowadzą do tego samego najbliższego serwera (względem lokalizacji węzła użytkownika); (3) porównać wyniki
+dla obu algorytmów dla k=2 tras w zakresie średniej liczby łączy tras podstawowych i zabezpieczających oraz współczynnika
+odrzucenia żądań. Ponowić analizę dla k=3 (tj. dla jednej trasy podstawowej i dwóch tras zabezpieczających).
+(ENG)
+Comparison of the properties of transmission algorithm variants in content delivery networks (CDNs): In content
+delivery networks, a user receives information from one of several available servers. In this context, for a given
+user, one of these servers acts as the primary server, while the others serve as backup servers (similarly to the
+routes leading to them). As part of the task, for the assigned network structure, you should: (1) implement a scheme
+for determining routes: a primary route and backup routes leading jointly to two and three different nearest servers
+(routes that are mutually node-disjoint), using a “naive” approach with Dijkstra's algorithm; (2) implement a
+variant of method (1) assuming that all routes for a given user node lead to the same nearest server (with respect to
+the location of the user node); (3) compare the results for both algorithms for k=2 routes in terms of the average
+number of links in the primary and backup routes, as well as the request rejection ratio. Repeat the analysis for k=3
+(i.e., for one primary route and two backup routes).
