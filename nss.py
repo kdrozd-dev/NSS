@@ -62,6 +62,8 @@ def different_servers(network, cdn_servers, k) -> dict[int, list[(list[int],int,
                     result.setdefault(node, []).append((best_path, best_length, target_cdn_server))
                     # Remove the nodes in the best path from the network copy
                     network_copy.remove_nodes_from(best_path [1:])  # Keep the source node
+                else:
+                    result.setdefault(node, []).append(([], float('inf'), None))  # No path found   
     return result
 
 def same_server(network, cdn_servers, k) -> dict[int, list[(list[int],int, int)]]:
@@ -101,7 +103,22 @@ def same_server(network, cdn_servers, k) -> dict[int, list[(list[int],int, int)]
                     result.setdefault(node, []).append(([], float('inf'), None))  # No path found
     return result
 
+def print_paths(title, paths) -> None:
+    print(f"\n{title}")
+    print("=" * len(title))
+    for node in sorted(paths):
+        print(f"Node {node}:")
+        for index, (path, length, target) in enumerate(paths[node], start=1):
+            if not path:
+                print(f"  Route {index}: no path available")
+                continue
+            route = " -> ".join(str(step) for step in path)
+            print(
+                f"  Route {index}: target_server = {target}, length = {length}, path = {route}"
+            )
+
+
 paths = different_servers(network, cdn_servers, 3)
-print(paths)
+print_paths("Different CDN servers", paths)
 paths = same_server(network, cdn_servers, 3)
-print(paths)
+print_paths("Same CDN server", paths)
