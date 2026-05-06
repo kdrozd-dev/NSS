@@ -41,6 +41,7 @@ def different_servers(network, cdn_servers, k) -> dict[int, list[(list[int],int,
     return a dictionary where the keys are the nodes in the network and the values are lists of tuples, 
     where each tuple contains a path (as a list of nodes), its length, and the target cdn_server. 
     The paths in each list should be ordered by length, with the shortest path first.
+    The first path is the primary path and the rest are backup paths.
     '''
     result = {}
     for node in network.nodes():
@@ -69,6 +70,7 @@ def same_server(network, cdn_servers, k) -> dict[int, list[(list[int],int, int)]
     return a dictionary where the keys are the nodes in the network and the values are lists of tuples, 
     where each tuple contains a path (as a list of nodes), its length, and the target cdn_server. 
     The paths in each list should be ordered by length, with the shortest path first.
+    The first path is the primary path and the rest are backup paths.
     '''
     result = {}
     for node in network.nodes():
