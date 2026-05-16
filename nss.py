@@ -47,9 +47,10 @@ def different_servers(network, cdn_servers, k) -> dict[int, list[(list[int],int,
     for node in network.nodes():
         if node not in cdn_servers:
             network_copy = network.copy()
+            cdn_servers_copy = cdn_servers.copy()
             for _ in range(k):
                 shortest_paths = []
-                for cdn_server in cdn_servers:
+                for cdn_server in cdn_servers_copy:
                     try:
                         path = nx.dijkstra_path(network_copy, source=node, target=cdn_server)
                         path_length = nx.dijkstra_path_length(network_copy, source=node, target=cdn_server)
@@ -61,7 +62,8 @@ def different_servers(network, cdn_servers, k) -> dict[int, list[(list[int],int,
                     best_path, best_length, target_cdn_server = shortest_paths[0]
                     result.setdefault(node, []).append((best_path, best_length, target_cdn_server))
                     # Remove the nodes in the best path from the network copy
-                    network_copy.remove_nodes_from(best_path [1:])  # Keep the source node
+                    network_copy.remove_nodes_from(best_path[1:-1])  # Keep the source and target nodes
+                    cdn_servers_copy.remove(target_cdn_server)  # Remove the target cdn_server from the list to ensure different servers
                 else:
                     result.setdefault(node, []).append(([], float('inf'), None))  # No path found   
     return result
@@ -117,8 +119,54 @@ def print_paths(title, paths) -> None:
                 f"  Route {index}: target_server = {target}, length = {length}, path = {route}"
             )
 
+def calculate_average_lengths(node_paths, k) -> tuple[float, float, float, float]:
+    primary_path_length = 0
+    backup_paths_lengths = [0] * (k - 1)
+    primary_count = 0
+    backup_counts = [0] * (k - 1)
+    for node in node_paths:
+        for i, (path, length, target) in enumerate(node_paths[node]):
+            if path:  # Only consider valid paths
+                if i == 0:
+                    primary_path_length += length
+                    primary_count += 1
+                else:
+                    backup_paths_lengths[i - 1] += length
+                    backup_counts[i - 1] += 1
+    primary_avg = primary_path_length / primary_count if primary_count > 0 else float('inf')
+    backup_avg = [length / count if count > 0 else float('inf') for length, count in zip(backup_paths_lengths, backup_counts)]
+    total_avg = (primary_path_length + sum(backup_paths_lengths)) / (primary_count + sum(backup_counts)) if (primary_count + sum(backup_counts)) > 0 else float('inf')
+    return (primary_avg, *backup_avg, total_avg)
 
-paths = different_servers(network, cdn_servers, 3)
-print_paths("Different CDN servers", paths)
-paths = same_server(network, cdn_servers, 3)
-print_paths("Same CDN server", paths)
+def average_lengths_to_pretty_str(averages, k) -> str:
+    result = []
+    result.append(f"\nAverage Path Lengths (k={k}):")
+    result.append("=" * 30)
+    result.append(f"Primary Path Average Length: {averages[0]:.2f}")
+    for i in range(1, k):
+        result.append(f"Backup Path {i} Average Length: {averages[i]:.2f}")
+    result.append(f"Overall Average Length: {averages[-1]:.2f}")
+    return "\n".join(result)
+
+def calculate_rejection_rate(node_paths, k) -> float:
+    nodes = len(node_paths)
+    reject_nodes = 0
+    for node in node_paths:
+        if any(not path for path, length, target in node_paths[node]):
+            reject_nodes += 1
+    return reject_nodes / nodes if nodes > 0 else 0.0
+
+for k in [2, 3]:
+    print(f"\nCalculating paths for k={k}...")
+    same_server_paths = same_server(network, cdn_servers, k)
+    print_paths(f"Same Server Paths (k={k})", same_server_paths)
+    different_servers_paths = different_servers(network, cdn_servers, k)
+    print_paths(f"Different Servers Paths (k={k})", different_servers_paths)
+    same_avg = calculate_average_lengths(same_server_paths, k)
+    same_rejection_rate = calculate_rejection_rate(same_server_paths, k)
+    different_avg = calculate_average_lengths(different_servers_paths, k)
+    different_rejection_rate = calculate_rejection_rate(different_servers_paths, k)
+    print(f"\nSame Server {average_lengths_to_pretty_str(same_avg, k)}")
+    print(f"Same Server Rejection Rate: {same_rejection_rate:.2%}")
+    print(f"\nDifferent Servers {average_lengths_to_pretty_str(different_avg, k)}")
+    print(f"Different Servers Rejection Rate: {different_rejection_rate:.2%}")
