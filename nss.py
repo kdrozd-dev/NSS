@@ -35,7 +35,7 @@ network.add_edges_from(edges)
 # cdn_server servers
 cdn_servers = [7,14,19,24]
 
-def different_servers(network, cdn_servers, k) -> dict[int, list[(list[int],int, int)]]:
+def different_servers(network, cdn_servers, k, keep_server_node = True) -> dict[int, list[(list[int],int, int)]]:
     ''' Find the k shortest paths from each node to the cdn_servers, but all paths must end at different cdn_servers.
     The paths must be node disjoint, meaning that they cannot share any nodes except for the source and target nodes.
     return a dictionary where the keys are the nodes in the network and the values are lists of tuples, 
@@ -62,7 +62,10 @@ def different_servers(network, cdn_servers, k) -> dict[int, list[(list[int],int,
                     best_path, best_length, target_cdn_server = shortest_paths[0]
                     result.setdefault(node, []).append((best_path, best_length, target_cdn_server))
                     # Remove the nodes in the best path from the network copy
-                    network_copy.remove_nodes_from(best_path[1:-1])  # Keep the source and target nodes
+                    if keep_server_node:
+                        network_copy.remove_nodes_from(best_path[1:-1])  # Keep the source and target nodes
+                    else:
+                        network_copy.remove_nodes_from(best_path[1:])  # Keep the source node but remove the target cdn_server node
                     cdn_servers_copy.remove(target_cdn_server)  # Remove the target cdn_server from the list to ensure different servers
                 else:
                     result.setdefault(node, []).append(([], float('inf'), None))  # No path found   
